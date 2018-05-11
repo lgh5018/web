@@ -1,0 +1,99 @@
+   downloadFile: function(url) {
+        // try {
+        //     var a = document.createElement('a');
+        //     a.href = url;
+        //     a.download = true;
+        //     a.click();
+        //     window.URL.revokeObjectURL(url);
+        // }
+        // catch (e) {
+            var elemIF = document.createElement("iframe");
+            elemIF.width=0;
+            elemIF.height=0;   
+            elemIF.src = url;   
+            elemIF.style.display = "none";  
+            document.body.appendChild(elemIF);
+
+        // }
+    },
+        // 中英文混合截取 
+    substr: function(str, n, suffix){ 
+        var r = /[^\x00-\xff]/g; 
+        if (str.replace(r,"mm").length <= n) { return str; } 
+        var m = Math.floor(n/2); 
+        for (var i = m; i < str.length; i++) { 
+            if (str.substr(0, i).replace(r, "mm").length >= n) { 
+                return str.substr(0,i) + (suffix || ''); 
+            } 
+        } 
+        return str; 
+    },
+    formDownFile: function(url) {
+        var form = $("<form>");//定义一个form表单
+        form.attr("style","display:none");
+        form.attr("target","_blank");
+        form.attr("method","get"); //请求类型
+        form.attr("action",url); //请求地址
+        $("body").append(form);//将表单放置在web中
+        form.get(0).submit();
+
+    }
+    
+    
+    /**
+ * 本地缓存功能
+ *
+ */
+Util.LocalData = {
+    userData: null,
+    name: location.hostname,
+    isLocalStorage: (typeof localStorage == 'undefined') ? false : true,
+    init: function () {
+        if (!this.userData) {
+            try {
+                this.userData = document.createElement('INPUT');
+                this.userData.type = "hidden";
+                this.userData.style.display = "none";
+                this.userData.addBehavior("#default#userData");
+                document.body.appendChild(this.userData);
+                var expires = new Date();
+                expires.setDate(expires.getDate() + 365);
+                this.userData.expires = expires.toUTCString();
+            }
+            catch (e) {
+                return false;
+            }
+        }
+        return true;
+    },
+    set: function (key, value) {
+        if (this.isLocalStorage) {
+            localStorage.setItem(key, value);
+        }
+        else if (this.init()) {
+            this.userData.load(this.name);
+            this.userData.setAttribute(key, value);
+            this.userData.save(this.name);
+        }
+    },
+    get: function (key) {
+        if (this.isLocalStorage) {
+            return localStorage.getItem(key);
+        }
+        else if (this.init()) {
+            this.userData.load(this.name);
+            return this.userData.getAttribute(key)
+        }
+        return null;
+    },
+    remove: function (key) {
+        if (this.isLocalStorage) {
+            localStorage.removeItem(key);
+        }
+        else if (this.init()) {
+            this.userData.load(this.name);
+            this.userData.removeAttribute(key);
+            this.userData.save(this.name);
+        }
+    }
+};
